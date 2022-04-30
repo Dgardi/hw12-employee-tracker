@@ -81,7 +81,7 @@ function employeeTracker() {
 // View Departments 
 
 function viewDepartments() {
-    db.getDepartments()
+    db.getDepartment()
     .then(([res]) => {
         let departments = res;
         console.log ("\n");
@@ -103,20 +103,33 @@ function viewRoles() {
     .then(() => employeeTracker());
 }
 
+// View Employees
+
+function getEmployees() {
+    db.getEmployees()
+    .then(([res]) => {
+        let emps = res;
+        console.log("\n");
+        console.table(emps)
+    })
+    .then(() => employeeTracker());
+}
+
+
 
 
 // Add Department 
 
 function addDept() {
-    prompt([
+    inquirer.prompt([
         {
             name: "name",
             message: "What department is this?"
         }
     ]).then (res => {
-        let dept = res;
-        db.createDepartment(dept)
-            .then(() => console.log(`Added ${dept.name} to the database`)
+        let department = res;
+        db.createDepartment(department)
+            .then(() => console.log(`Added ${department.name} to the database`)
             .then(() => employeeTracker()));
     })
 
@@ -125,16 +138,16 @@ function addDept() {
 // Add Role 
 
 function addRole() {
-    db.getDepartments()
+    db.getDepartment()
     .then(([res]) => {
-        let departments = res;
-        const depts = departments.map(({ id, name}) =>
+        let department = res;
+        const departments = departments.map(({ id, name}) =>
         ({
             name: name,
             value: id
         }));
 
-        prompt([
+        inquirer.prompt([
             {
                 name: "title",
                 message: "What role is this?"
@@ -147,7 +160,7 @@ function addRole() {
                 type: "list",
                 name: "department_id",
                 message: "Which department is this in?",
-                choices: depts
+                choices: departments
             }
         ]).then(role => {
             db.createRole(role)
@@ -160,7 +173,7 @@ function addRole() {
 
 // Add Employee
 function addEmp() {
-    prompt([
+    inquirer.prompt([
         {
             name: "first",
             message: "What is their first name?"
@@ -170,8 +183,8 @@ function addEmp() {
             message: "What is their last name?"
         }
     ]).then(res => {
-        let firstName = res.first;
-        let lastName = res.last;
+        let firstName = res.first_name;
+        let lastName = res.last_name;
 
         db.getRoles()
         .then(([response]) => {
@@ -181,15 +194,19 @@ function addEmp() {
                 value: id
             }));
 
-            prompt({
+           inquirer.prompt({
                 type: "list",
                 name: "roleId",
                 message: "What is their role?",
                 choices: roleChoices
-            }).then (res=> {
-                let roleId = res.roleId;
-
-            }).then(() => console.log(`Added ${first} ${last} to the database`))
+            // }).then (res=> {
+            //     let roleId = res.roleId;
+            //     const employeeChoice = employees.map(({ id, first_name, last_name}) => ({
+            //         name: `${first_name} ${last_name}`,
+            //         value: id
+            //     }
+            //     ));
+            }).then(() => console.log(`Added ${firstName} ${lastName} in ${roleId} to the database`))
             .then(() => employeeTracker)
         })
     })
@@ -206,7 +223,7 @@ function updateEmpRole() {
             value: id
         }));
 
-        prompt([
+        inquirer.prompt([
             {
                 type: "list",
                 name: "employeeId",
@@ -224,7 +241,7 @@ function updateEmpRole() {
                         value: id
                     }));
 
-                    prompt([
+                    inquirer.prompt([
                         {
                             type:"list",
                             name: "roleId",
