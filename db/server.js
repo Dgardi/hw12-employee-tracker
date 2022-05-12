@@ -1,6 +1,6 @@
 const mysql = require ("mysql2");
 
-    const connection = mysql.createConnection({
+    const server = mysql.createConnection({
           host: 'localhost',
           // MySQL username,
           user: 'root',
@@ -8,7 +8,7 @@ const mysql = require ("mysql2");
           password: 'root',
           database: 'organization'
         });
-        console.log(`Connected to the organization database.`)
+        console.log(`Connected`)
 
 
-module.exports = connection;
+module.exports = server;

@@ -58,17 +58,20 @@ function employeeTracker() {
             case "ViewRoles":
                 viewRoles();
                 break;
+            case "ViewEmployees":
+                viewEmployees();
+                break;
             case "AddDept":
-                addDept();
+                newDept();
                 break;
             case "AddRole":
-                addRole();
+                newRole();
                 break;
             case "AddEmp":
-                addEmp();
+                newEmp();
                 break;
             case "UpdateEmpRole":
-                updateEmpRole();
+                modifyEmpRole();
                 break;
             default:
                 end();            
@@ -105,7 +108,7 @@ function viewRoles() {
 
 // View Employees
 
-function getEmployees() {
+function viewEmployees() {
     db.getEmployees()
     .then(([res]) => {
         let emps = res;
@@ -120,30 +123,30 @@ function getEmployees() {
 
 // Add Department 
 
-function addDept() {
+function newDept() {
     inquirer.prompt([
         {
             name: "name",
             message: "What department is this?"
         }
     ]).then (res => {
-        let department = res;
-        db.createDepartment(department)
-            .then(() => console.log(`Added ${department.name} to the database`)
-            .then(() => employeeTracker()));
+        let nuDept = res;
+        db.addDept(nuDept)
+            .then(() => console.log(`Added the ${nuDept.name} department`))
+            .then(() => employeeTracker());
     })
 
 }
 
 // Add Role 
 
-function addRole() {
+function newRole() {
     db.getDepartment()
     .then(([res]) => {
-        let department = res;
-        const departments = departments.map(({ id, name}) =>
+        let departments = res;
+        const deptOptions = departments.map(({ id, name}) =>
         ({
-            name: name,
+            name,
             value: id
         }));
 
@@ -160,11 +163,11 @@ function addRole() {
                 type: "list",
                 name: "department_id",
                 message: "Which department is this in?",
-                choices: departments
+                choices: deptOptions
             }
         ]).then(role => {
-            db.createRole(role)
-                .then(() => console.log(`Added ${role.title} to database`))
+            db.addRole(role)
+                .then(() => console.log(`Added ${role.title} role`))
                 .then(() => employeeTracker())
                 })
         })
@@ -172,7 +175,7 @@ function addRole() {
 }
 
 // Add Employee
-function addEmp() {
+function newEmp() {
     inquirer.prompt([
         {
             name: "first",
@@ -183,13 +186,13 @@ function addEmp() {
             message: "What is their last name?"
         }
     ]).then(res => {
-        let firstName = res.first_name;
-        let lastName = res.last_name;
+        let firstName = res.first;
+        let lastName = res.last;
 
         db.getRoles()
         .then(([response]) => {
             let roles = response;
-            const roleChoices = roles.map(({ id, title}) => ({
+            const roleOptions = roles.map(({ id, title}) => ({
                 name: title,
                 value: id
             }));
@@ -198,26 +201,30 @@ function addEmp() {
                 type: "list",
                 name: "roleId",
                 message: "What is their role?",
-                choices: roleChoices
-            // }).then (res=> {
-            //     let roleId = res.roleId;
-            //     const employeeChoice = employees.map(({ id, first_name, last_name}) => ({
-            //         name: `${first_name} ${last_name}`,
-            //         value: id
-            //     }
-            //     ));
-            }).then(() => console.log(`Added ${firstName} ${lastName} in ${roleId} to the database`))
-            .then(() => employeeTracker)
+                choices: roleOptions
+            }).then (data=> { 
+                let roleId = data.roleId;
+                let employee = {
+                    role_id: roleId,
+                    first_name: firstName,
+                    last_name: lastName
+                }
+                db.addEmp(employee);
+                })
+             
+            .then(() => console.log(`${firstName} ${lastName} has been added to the database`))
+            .then(() => employeeTracker())
         })
     })
 
 }
+
 // Update Employee
-function updateEmpRole() {
+function modifyEmpRole() {
     db.getEmployees()
     .then(([res]) => {
-        let emp = res;
-        const empChoices = emp.map(({ id, first_name, last_name}) =>
+        let employees = res;
+        const empChoices = employees.map(({ id, first_name, last_name}) =>
         ({ 
             name: `${first_name} ${last_name}`,
             value: id
@@ -260,5 +267,6 @@ function updateEmpRole() {
 
 // End Application
 function end() {
+    console.log('Have a great day!')
     process.exit();
 }
